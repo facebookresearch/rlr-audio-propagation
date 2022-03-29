@@ -65,7 +65,7 @@ public:
 	bool indirect = true;
 	bool diffraction = true;
 	bool transmission = false;
-	bool meshSimplification = true;
+	bool meshSimplification = false;
 	bool temporalCoherence = false;
 	bool dumpWaveFiles = false;
 	bool enableMaterials = true;
