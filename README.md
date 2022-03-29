@@ -13,7 +13,7 @@ This is used as a git-submodule in the habitat-sim project and allows for the ad
 ## Requirements
 
 rlr-audio-propagation requires or works with
-* Linux
+* Linux - x64
 
 ## License
 
