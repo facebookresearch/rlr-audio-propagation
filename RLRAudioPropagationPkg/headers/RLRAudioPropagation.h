@@ -27,6 +27,9 @@ public:
     // Returns the error code.
     ErrorCodes Configure(const Configuration& config);
 
+    // Load the material database from a JSON file
+    ErrorCodes LoadAudioMaterialJSON(const std::string& jsonPath);
+
     // Load the mesh using an obj file. Returns the error code.
     ErrorCodes LoadMesh(const std::string& meshPath);
 
