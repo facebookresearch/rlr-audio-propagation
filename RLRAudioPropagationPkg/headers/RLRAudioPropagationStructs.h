@@ -56,7 +56,7 @@ public:
 	float updateDt = 0.02f;
 	float irTime = 4.f;
 	float unitScale = 1.f;
-	float globalVolume = 4.f;
+	float globalVolume = 0.25f;
 	float listenerRadius = 0.1f;
 	std::size_t indirectRayCount = 5000;
 	std::size_t indirectRayDepth = 200;
@@ -66,8 +66,8 @@ public:
 	bool direct = true;
 	bool indirect = true;
 	bool diffraction = true;
-	bool transmission = false;
-	bool meshSimplification = true;
+	bool transmission = true;
+	bool meshSimplification = false;
 	bool temporalCoherence = false;
 	bool dumpWaveFiles = false;
 	bool enableMaterials = true;
