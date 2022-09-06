@@ -109,6 +109,11 @@ typedef struct
 	size_t directSHOrder;// = 3;
 	/** \brief The spherical harmonic order used for indirect sound (reflections, reverb). */
 	size_t indirectSHOrder;// = 1;
+	/** \brief The maximum number of rays that are used to compute direct sound between each source and listener.
+      *
+      * The actual number of rays is proportional to the source's solid angle.
+      */
+	size_t directRayCount;// = 500;
 	/** \brief The number of indirect rays that are emitted from the listener. This is the main parameter for controlling quality and performance. */
 	size_t indirectRayCount;// = 5000;
 	/** \brief The maximum number of times that an indirect listener ray can reflect. Impacts quality and performance. */
@@ -561,8 +566,8 @@ struct RLRA_DEPRECATED Quaternion
 #pragma pack(push, 1)
 struct RLRA_DEPRECATED ChannelLayout
 {
-    RLRA_DEPRECATED ChannelLayout();
-	RLRA_DEPRECATED ChannelLayoutType channelType;
+    RLRA_DEPRECATED ChannelLayout(); // Hide initialization of channelType to avoid deprecated warnings.
+	RLRA_DEPRECATED ChannelLayoutType channelType; // Binaural default
 	std::size_t channelCount = 2;
 };
 #pragma pack(pop)
