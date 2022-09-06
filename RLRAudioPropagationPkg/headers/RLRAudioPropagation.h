@@ -163,7 +163,7 @@ typedef struct
 } RLRA_ContextConfiguration;
 #pragma pack(pop)
 
-/** \brief A struct that describes the material categories assigned to each face of a box-shaped geometry..
+/** \brief A struct that describes the material categories assigned to each face of a box-shaped geometry.
   *
   * The material categories correspond to those provided in the material database via RLRA_SetMaterialDatabaseJSON().
   * If a NULL or invalid material name is provided, the default material is used for those faces.
@@ -178,6 +178,48 @@ typedef struct
 	const char* zMin;
 	const char* zMax;
 } RLRA_BoxMaterialCategories;
+#pragma pack(pop)
+
+/** \brief A struct that represents a ray intersection query, containing both inputs and outputs.
+  *
+  * Before tracing a ray, the following members must be set. The rest can be uninitialized.
+  * - 'origin', 'direction', 'tMin', 'tMax' should be set according to the desired ray query.
+  * - 'primitive' should be initialized to -1 (all bits 1).
+  *
+  * After tracing a ray, the following values contain outputs.
+  * - 'primitive': if not -1, an intersection was found.
+  * - 'normal', 'bary0', 'bary1', 'tMax': if query type is "first hit" and intersection was found.
+  */
+#pragma pack(push,1)
+typedef struct
+{
+	/* Inputs */
+	/** \brief The origin point of the ray in world space. */
+	float origin[3];
+	/** \brief The direction of the ray in world space. Does not need to be unit length. */
+	float direction[3];
+	/** \brief The minimum distance along the ray where intersection will be detected, as a multiple of the ray direction length. */
+	float tMin;
+	/** \brief The maximum distance along the ray where intersection will be detected, as a multiple of the ray direction length.
+	  *
+	  * If there is an intersection, and the query type is "first hit", then this will be
+	  * set to the distance where the intersection occurred.
+	  */
+	float tMax;
+
+	/* Outputs */
+	/** \brief If equal to -1, there is no intersection. Otherwise, this is the index of the intersected primitive in the intersected object.
+	  *
+	  * This must be initialized to -1 before tracing a ray.
+	  */
+	uint32_t primitive;
+	/** \brief If there is an intersection, this contains the 3D un-normalized vector perpendicular to the surface at the intersection point. */
+	float normal[3];
+	/** \brief If there is an intersection with a triangle, this contains the barycentric coordinate of the 0-index triangle vertex. */
+	float bary0;
+	/** \brief If there is an intersection with a triangle, this contains the barycentric coordinate of the 1-index triangle vertex. */
+	float bary1;
+} RLRA_Ray;
 #pragma pack(pop)
 
 //******************************************************************************
@@ -451,6 +493,36 @@ RLRA_EXPORT RLRA_Error RLRA_WriteIRMetrics( const RLRA_Context context, size_t l
   * while a value closer to 1 indicates a closed geometry (e.g. indoors).
   */
 RLRA_EXPORT float RLRA_GetIndirectRayEfficiency( const RLRA_Context context );
+
+/// Trace a ray starting from an origin point along the given direction and find any intersection.
+/**
+  * This function detects if there are any intersections between the minimum and
+  * maximum distance along the ray, but does not necessarily find the first intersection.
+  * The ray structure will be populated with information about whether or not there
+  * was a ray intersection, but will not contain any additional information (i.e. hit distance).
+  * This function should be preferred if hit information is not needed because it will be
+  * faster than RLRA_TraceRayFirstHit().
+  *
+  * The direction does not need to be a unit vector, but if not, then distances must be provided
+  * and returned as a multiple of the direction length.
+  *
+  * NOTE: This function should not be called until after calling RLRA_Simulate(), because
+  * the ray tracing data structures will not be initialized until that point.
+  */
+RLRA_EXPORT RLRA_Error RLRA_TraceRayAnyHit( const RLRA_Context context, RLRA_Ray* ray );
+
+/// Trace a ray starting from an origin point along the given direction and find the first intersection.
+/**
+  * This will find the first intersection along the ray, if one exists, and then populate the
+  * ray structure with information about the intersection.
+  *
+  * The direction does not need to be a unit vector, but if not, then distances must be provided
+  * and returned as a multiple of the direction length.
+  *
+  * NOTE: This function should not be called until after calling RLRA_Simulate(), because
+  * the ray tracing data structures will not be initialized until that point.
+  */
+RLRA_EXPORT RLRA_Error RLRA_TraceRayFirstHit( const RLRA_Context context, RLRA_Ray* ray );
 
 }; // extern "C"
 
