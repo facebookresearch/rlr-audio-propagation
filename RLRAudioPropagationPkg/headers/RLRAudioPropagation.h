@@ -180,15 +180,23 @@ typedef struct
 } RLRA_BoxMaterialCategories;
 #pragma pack(pop)
 
+/** \brief A enum that describes the types of ray intersections that can occur. */
+typedef enum
+{
+	/** \brief An enum value indicating that a ray did not intersect with anything. */
+	RLRA_RayHit_False = 0,
+	/** \brief An enum value indicating that a ray intersected something. */
+	RLRA_RayHit_True = 1
+} RLRA_RayHit;
+
 /** \brief A struct that represents a ray intersection query, containing both inputs and outputs.
   *
   * Before tracing a ray, the following members must be set. The rest can be uninitialized.
   * - 'origin', 'direction', 'tMin', 'tMax' should be set according to the desired ray query.
-  * - 'primitive' should be initialized to -1 (all bits 1).
   *
   * After tracing a ray, the following values contain outputs.
-  * - 'primitive': if not -1, an intersection was found.
-  * - 'normal', 'bary0', 'bary1', 'tMax': if query type is "first hit" and intersection was found.
+  * - 'hit': if equal to RLRA_RayHit_True, an intersection was found.
+  * - 'normal', 'tMax': if query type is "first hit" and an intersection was found.
   */
 #pragma pack(push,1)
 typedef struct
@@ -203,22 +211,22 @@ typedef struct
 	/** \brief The maximum distance along the ray where intersection will be detected, as a multiple of the ray direction length.
 	  *
 	  * If there is an intersection, and the query type is "first hit", then this will be
-	  * set to the distance where the intersection occurred.
+	  * set to the distance where the intersection occurred. The intersection point can be
+	  * calculated as: hitPoint = origin + direction*tMax.
 	  */
 	float tMax;
 
 	/* Outputs */
-	/** \brief If equal to -1, there is no intersection. Otherwise, this is the index of the intersected primitive in the intersected object.
+	/** \brief An enum that describes the type of ray intersection that was found.
 	  *
-	  * This must be initialized to -1 before tracing a ray.
+	  * If the value is RLRA_RayHit_True, there was an intersection.
+	  **/
+	RLRA_RayHit hit;
+	/** \brief If there is an intersection, and the query type is "first hit",
+	  * this contains the 3D un-normalized vector perpendicular to the surface
+	  * at the intersection point.
 	  */
-	uint32_t primitive;
-	/** \brief If there is an intersection, this contains the 3D un-normalized vector perpendicular to the surface at the intersection point. */
 	float normal[3];
-	/** \brief If there is an intersection with a triangle, this contains the barycentric coordinate of the 0-index triangle vertex. */
-	float bary0;
-	/** \brief If there is an intersection with a triangle, this contains the barycentric coordinate of the 1-index triangle vertex. */
-	float bary1;
 } RLRA_Ray;
 #pragma pack(pop)
 
